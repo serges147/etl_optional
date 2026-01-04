@@ -199,6 +199,51 @@ namespace
       CHECK(!data4.has_value());
     }
 
+#if ETL_USING_CPP11
+    // `constexpr optional() noexcept`
+    TEST(test_assert_noexcept_of_default_constructor_cpp11)
+    {
+      ETL_STATIC_ASSERT(
+        std::is_default_constructible<etl::optional<int>>::value,
+        "`etl::optional<int>` is default constructible");
+      ETL_STATIC_ASSERT(
+        std::is_default_constructible<etl::optional<Fallible>>::value,
+        "`etl::optional<Fallible>` is default constructible");
+      ETL_STATIC_ASSERT(
+        std::is_default_constructible<etl::optional<Infallible>>::value,
+        "`etl::optional<Infallible>` is default constructible");
+
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<int>{}),
+        "No throw `elt::optional<T>{}` for trivial `T{}`"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<Fallible>{}),
+        "No throw `elt::optional<T>{}` even for fallible `T{}`"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<Infallible>{}),
+        "No throw `elt::optional<T>{}` for infallible `T{}`"
+        );
+
+      // Compare with STL
+      #if ETL_USING_CPP17
+      ETL_STATIC_ASSERT(
+        noexcept(std::optional<int>{}),
+        "`std::optional<T>{}` has the same no throw behavior as ETL, where T is fundamental"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(std::optional<Fallible>{}),
+        "`std::optional<T>{}` has the same no throw behavior as ETL, even for fallible `T{}`"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(std::optional<Infallible>{}),
+        "`std::optional<T>{}` has the same no throw behavior as ETL, where `T{}` is non-throwable"
+      );
+      #endif
+    }
+#endif
+
 #if ETL_USING_CPP14
     //*************************************************************************
     TEST(test_emplace_construction_cpp14)
