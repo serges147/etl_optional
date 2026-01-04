@@ -32,7 +32,7 @@ SOFTWARE.
 #include "platform.h"
 
 #if (ETL_USING_CPP11)
-  #define ETL_STATIC_ASSERT(Condition, Message) static_assert((Condition), (Message))
+  #define ETL_STATIC_ASSERT(Condition, Message) static_assert((Condition), Message)
 #else
   template <bool Condition>
   struct ETL_ETL_STATIC_ASSERT_FAILED;
