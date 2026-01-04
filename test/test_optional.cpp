@@ -228,7 +228,7 @@ namespace
         );
 
       // Compare with STL
-      #if ETL_USING_CPP17 && ETL_USING_STL
+      #if ETL_USING_CPP17
       ETL_STATIC_ASSERT(
         noexcept(std::optional<int>{}),
         "`std::optional<T>{}` has the same no throw behavior as ETL, where T is fundamental"
@@ -270,7 +270,7 @@ namespace
         "No throw for `elt::optional<T>{etl::nullopt}` where T is infallible"
         );
 
-      #if ETL_USING_CPP17 && ETL_USING_STL
+      #if ETL_USING_CPP17
       static_assert(
         noexcept(std::optional<int>{std::nullopt}),
         "`std::optional<T>{std::nullopt}` has the same no throw behavior as ETL, where T is fundamental"
