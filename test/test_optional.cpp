@@ -31,6 +31,7 @@ SOFTWARE.
 #include <string>
 #include <ostream>
 #include <cstdint>
+#include <type_traits>
 #include <vector>
 
 #include "etl/optional.h"
@@ -75,6 +76,85 @@ namespace
     int a;
   };
 #include "etl/private/diagnostic_pop.h"
+
+#if ETL_USING_CPP11
+    class Fallible final
+    {
+    public:
+      explicit Fallible(const bool _should_throw = false) noexcept(false)
+        : should_throw{_should_throw}
+      {
+        throw_once();
+      }
+      Fallible(const Fallible& other) noexcept(false)
+        : should_throw{other.should_throw}
+      {
+        throw_once();
+      }
+      Fallible& operator=(const Fallible& other) noexcept(false)
+      {
+        should_throw = other.should_throw;
+        throw_once();
+        return *this;
+      }
+      Fallible(Fallible&& other) noexcept(false)
+        : should_throw{other.should_throw}
+      {
+        throw_once();
+      }
+      Fallible& operator=(Fallible&& other) noexcept(false)
+      {
+        should_throw = other.should_throw;
+        throw_once();
+        return *this;
+      }
+      ~Fallible() noexcept  // NOLINT Non-trivial destructor on purpose
+      {
+      }
+    private:
+      bool should_throw;
+
+      void throw_once() noexcept(false)
+      {
+        if (should_throw)
+        {
+          should_throw = false;
+          throw std::bad_exception();
+        }
+      }
+    };
+    ETL_STATIC_ASSERT(std::is_default_constructible<Fallible>::value, "`Fallible` is default constructible");
+    ETL_STATIC_ASSERT(std::is_copy_constructible<Fallible>::value, "`Fallible` is copy constructible");
+    ETL_STATIC_ASSERT(std::is_move_constructible<Fallible>::value, "`Fallible` is move constructible");
+    ETL_STATIC_ASSERT(std::is_copy_assignable<Fallible>::value, "`Fallible` is copy assignable");
+    ETL_STATIC_ASSERT(std::is_move_assignable<Fallible>::value, "`Fallible` is move assignable");
+    ETL_STATIC_ASSERT(!noexcept(Fallible{}), "`Fallible{}` throws std::bad_exception()");
+    ETL_STATIC_ASSERT(!std::is_nothrow_copy_constructible<Fallible>::value, "`Fallible` copy constructor throws");
+    ETL_STATIC_ASSERT(!std::is_nothrow_move_constructible<Fallible>::value, "`Fallible` move constructor throws");
+    ETL_STATIC_ASSERT(!std::is_nothrow_copy_assignable<Fallible>::value, "`Fallible` copy assignment throws");
+    ETL_STATIC_ASSERT(!std::is_nothrow_move_assignable<Fallible>::value, "`Fallible` move assignment throws");
+
+    class Infallible final
+    {
+    public:
+      Infallible() noexcept {}  // NOLINT Non-trivial on purpose
+      Infallible(const Infallible&) noexcept {}  // NOLINT Non-trivial on purpose
+      Infallible(Infallible&&) noexcept {}
+      Infallible& operator=(const Infallible&) noexcept { return *this; }  // NOLINT Non-trivial on purpose
+      Infallible& operator=(Infallible&&) noexcept { return *this; }
+      ~Infallible() noexcept {}  // NOLINT Non-trivial on purpose
+    };
+    ETL_STATIC_ASSERT(std::is_default_constructible<Infallible>::value, "`Infallible` is default constructible");
+    ETL_STATIC_ASSERT(std::is_copy_constructible<Infallible>::value, "`Infallible` is copy constructible");
+    ETL_STATIC_ASSERT(std::is_move_constructible<Infallible>::value, "`Infallible` is move constructible");
+    ETL_STATIC_ASSERT(std::is_copy_assignable<Infallible>::value, "`Infallible` is copy assignable");
+    ETL_STATIC_ASSERT(std::is_move_assignable<Infallible>::value, "`Infallible` is move assignable");
+    ETL_STATIC_ASSERT(noexcept(Infallible{}), "`Infallible{}` never throws");
+    ETL_STATIC_ASSERT(std::is_nothrow_copy_constructible<Infallible>::value, "`Infallible` copy constructor never throws");
+    ETL_STATIC_ASSERT(std::is_nothrow_move_constructible<Infallible>::value, "`Infallible` move constructor never throws");
+    ETL_STATIC_ASSERT(std::is_nothrow_copy_assignable<Infallible>::value, "`Infallible` copy assignment never throws");
+    ETL_STATIC_ASSERT(std::is_nothrow_move_assignable<Infallible>::value, "`Infallible` move assignment never throws");
+#endif
 
   SUITE(test_optional)
   {
