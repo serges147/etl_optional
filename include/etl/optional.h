@@ -1360,7 +1360,7 @@ namespace etl
     //***************************************************************************
     template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-    optional(etl::nullopt_t)
+    optional(etl::nullopt_t) ETL_NOEXCEPT
       : impl_t(etl::nullopt)
     {
     }
@@ -1370,7 +1370,7 @@ namespace etl
     //***************************************************************************
     template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional(etl::nullopt_t)
+    optional(etl::nullopt_t) ETL_NOEXCEPT
       : impl_t(etl::nullopt)
     {
     }

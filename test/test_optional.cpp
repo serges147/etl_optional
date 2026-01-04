@@ -31,6 +31,7 @@ SOFTWARE.
 #include <string>
 #include <ostream>
 #include <cstdint>
+#include <optional>
 #include <type_traits>
 #include <vector>
 
@@ -227,7 +228,7 @@ namespace
         );
 
       // Compare with STL
-      #if ETL_USING_CPP17
+      #if ETL_USING_CPP17 && ETL_USING_STL
       ETL_STATIC_ASSERT(
         noexcept(std::optional<int>{}),
         "`std::optional<T>{}` has the same no throw behavior as ETL, where T is fundamental"
@@ -240,6 +241,48 @@ namespace
         noexcept(std::optional<Infallible>{}),
         "`std::optional<T>{}` has the same no throw behavior as ETL, where `T{}` is non-throwable"
       );
+      #endif
+    }
+
+    // `constexpr optional(nullopt_t) noexcept`
+    TEST(test_assert_noexcept_of_nullopt_constructor_cpp11)
+    {
+      ETL_STATIC_ASSERT(
+        (std::is_constructible<etl::optional<int>, etl::nullopt_t>::value),
+        "`etl::optional<int>` is nullopt constructible");
+      ETL_STATIC_ASSERT(
+        (std::is_constructible<etl::optional<Fallible>, etl::nullopt_t>::value),
+        "`etl::optional<Fallible>` is nullopt constructible");
+      ETL_STATIC_ASSERT(
+        (std::is_constructible<etl::optional<Infallible>, etl::nullopt_t>::value),
+        "`etl::optional<Infallible>` is nullopt constructible");
+
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<int>{etl::nullopt}),
+        "No throw for `elt::optional<T>{etl::nullopt}` where T is fundamental"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<Fallible>{etl::nullopt}),
+        "No throw for `elt::optional<T>{etl::nullopt}` where T is fallible"
+        );
+      ETL_STATIC_ASSERT(
+        noexcept(etl::optional<Infallible>{etl::nullopt}),
+        "No throw for `elt::optional<T>{etl::nullopt}` where T is infallible"
+        );
+
+      #if ETL_USING_CPP17 && ETL_USING_STL
+      static_assert(
+        noexcept(std::optional<int>{std::nullopt}),
+        "`std::optional<T>{std::nullopt}` has the same no throw behavior as ETL, where T is fundamental"
+        );
+      static_assert(
+        noexcept(std::optional<Fallible>{std::nullopt}),
+        "`std::optional<T>{std::nullopt}` has the same no throw behavior as ETL, where T is fallible"
+        );
+      static_assert(
+        noexcept(std::optional<Infallible>{std::nullopt}),
+        "`std::optional<T>{std::nullopt}` has the same no throw behavior as ETL, where T is infallible"
+        );
       #endif
     }
 #endif
