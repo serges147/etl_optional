@@ -1389,7 +1389,6 @@ namespace etl
     //***************************************************************************
     /// Copy constructor.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
     optional(const optional& other)
       : impl_t(other)
@@ -1399,9 +1398,19 @@ namespace etl
     //***************************************************************************
     /// Copy constructor.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
+    ETL_CONSTEXPR14
+    optional(const optional<U>& other)
+      : impl_t(other)
+    {
+    }
+
+    //***************************************************************************
+    /// Copy constructor.
+    //***************************************************************************
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional(const optional& other)
+    optional(const optional<U>& other)
       : impl_t(other)
     {
     }
@@ -1420,42 +1429,51 @@ namespace etl
     //***************************************************************************
     /// Move constructor.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-    optional(optional&& other)
-      : impl_t(other)
+    optional(optional&& other) ETL_NOEXCEPT_EXPR(std::is_nothrow_move_constructible<T>::value)
+      : impl_t(etl::move(other))
     {
     }
 
     //***************************************************************************
     /// Move constructor.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
+    ETL_CONSTEXPR14
+    optional(optional<U>&& other)
+      : impl_t(etl::move(other))
+    {
+    }
+
+    //***************************************************************************
+    /// Move constructor.
+    //***************************************************************************
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional(optional&& other)
-      : impl_t(other)
+    optional(optional<U>&& other)
+      : impl_t(etl::move(other))
     {
     }
 #endif
 
 #if ETL_USING_CPP11
     //***************************************************************************
-    /// Construct from value type.
+    /// Forward construct from value type.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-    optional(const T& value_)
-      : impl_t(value_)
+    optional(U&& value_)
+      : impl_t(etl::forward<U>(value_))
     {
     }
 
     //***************************************************************************
-    /// Construct from value type.
+    /// Forward construct from value type.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional(const T& value_)
-      : impl_t(value_)
+    optional(U&& value_)
+      : impl_t(etl::forward<U>(value_))
     {
     }
 #else
@@ -1464,29 +1482,6 @@ namespace etl
     //***************************************************************************
     optional(const T& value_)
       : impl_t(value_)
-    {
-    }
-#endif
-
-
-#if ETL_USING_CPP11
-    //***************************************************************************
-    /// Move construct from value type.
-    //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
-    ETL_CONSTEXPR14
-    optional(T&& value_)
-      : impl_t(etl::move(value_))
-    {
-    }
-
-    //***************************************************************************
-    /// Move construct from value type.
-    //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
-    ETL_CONSTEXPR20_STL
-    optional(T&& value_)
-      : impl_t(etl::move(value_))
     {
     }
 #endif
@@ -1545,7 +1540,7 @@ namespace etl
     //***************************************************************************
     template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-    optional& operator =(etl::nullopt_t)
+    optional& operator =(etl::nullopt_t) ETL_NOEXCEPT
     {
       impl_t::operator=(etl::nullopt);
 
@@ -1557,7 +1552,7 @@ namespace etl
     //***************************************************************************
     template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional& operator =(etl::nullopt_t)
+    optional& operator =(etl::nullopt_t) ETL_NOEXCEPT
     {
       impl_t::operator=(etl::nullopt);
 
@@ -1579,7 +1574,6 @@ namespace etl
     //***************************************************************************
     /// Assignment operator from optional.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
     optional& operator =(const optional& other)
     {
@@ -1591,9 +1585,21 @@ namespace etl
     //***************************************************************************
     /// Assignment operator from optional.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
+    ETL_CONSTEXPR14
+    optional& operator =(const optional<U>& other)
+    {
+      impl_t::operator=(other);
+
+      return *this;
+    }
+
+    //***************************************************************************
+    /// Assignment operator from optional.
+    //***************************************************************************
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional& operator =(const optional& other)
+    optional& operator =(const optional<U>& other)
     {
       impl_t::operator=(other);
 
@@ -1615,9 +1621,10 @@ namespace etl
     //***************************************************************************
     /// Move assignment operator from optional.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-      optional& operator =(optional&& other)
+      optional& operator =(optional&& other) ETL_NOEXCEPT_EXPR(
+                                               std::is_nothrow_move_assignable<T>::value &&
+                                               std::is_nothrow_move_constructible<T>::value)
     {
       impl_t::operator=(etl::move(other));
 
@@ -1627,9 +1634,21 @@ namespace etl
     //***************************************************************************
     /// Move assignment operator from optional.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
+    ETL_CONSTEXPR14
+      optional& operator =(optional<U>&& other)
+    {
+      impl_t::operator=(etl::move(other));
+
+      return *this;
+    }
+
+    //***************************************************************************
+    /// Move assignment operator from optional.
+    //***************************************************************************
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-      optional& operator =(optional&& other)
+      optional& operator =(optional<U>&& other)
     {
       impl_t::operator=(etl::move(other));
 
@@ -1639,25 +1658,25 @@ namespace etl
 
 #if ETL_USING_CPP11
     //***************************************************************************
-    /// Assignment operator from value type.
+    /// Forward assignment operator from value type.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP14>
     ETL_CONSTEXPR14
-    optional& operator =(const T& value_)
+      optional& operator =(U&& value_)
     {
-      impl_t::operator=(value_);
+      impl_t::operator=(etl::forward<U>(value_));
 
       return *this;
     }
 
     //***************************************************************************
-    /// Assignment operator from value type.
+    /// Forward assignment operator from value type.
     //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
+    template <typename U, ETL_OPTIONAL_ENABLE_CPP20_STL>
     ETL_CONSTEXPR20_STL
-    optional& operator =(const T& value_)
+      optional& operator =(U&& value_)
     {
-      impl_t::operator=(value_);
+      impl_t::operator=(etl::forward<U>(value_));
 
       return *this;
     }
@@ -1668,32 +1687,6 @@ namespace etl
     optional& operator =(const T& value_)
     {
       impl_t::operator=(value_);
-
-      return *this;
-    }
-#endif
-
-#if ETL_USING_CPP11
-    //***************************************************************************
-    /// Move assignment operator from value type.
-    //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP14>
-    ETL_CONSTEXPR14
-      optional& operator =(T&& value_)
-    {
-      impl_t::operator=(etl::move(value_));
-
-      return *this;
-    }
-
-    //***************************************************************************
-    /// Move assignment operator from value type.
-    //***************************************************************************
-    template <typename U = T, ETL_OPTIONAL_ENABLE_CPP20_STL>
-    ETL_CONSTEXPR20_STL
-      optional& operator =(T&& value_)
-    {
-      impl_t::operator=(etl::move(value_));
 
       return *this;
     }

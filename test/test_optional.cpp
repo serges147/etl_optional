@@ -270,6 +270,7 @@ namespace
         "No throw for `elt::optional<T>{etl::nullopt}` where T is infallible"
         );
 
+      // Compare with STL
       #if ETL_USING_CPP17
       static_assert(
         noexcept(std::optional<int>{std::nullopt}),
@@ -282,6 +283,49 @@ namespace
       static_assert(
         noexcept(std::optional<Infallible>{std::nullopt}),
         "`std::optional<T>{std::nullopt}` has the same no throw behavior as ETL, where T is infallible"
+        );
+      #endif
+    }
+
+    // `constexpr optional(optional&& other) noexcept(conditional)`
+    TEST(test_assert_noexcept_of_move_constructor_cpp11)
+    {
+      ETL_STATIC_ASSERT(
+        std::is_move_constructible<etl::optional<int>>::value,
+        "`etl::optional<int>` is move constructible");
+      ETL_STATIC_ASSERT(
+        std::is_move_constructible<etl::optional<Fallible>>::value,
+        "`etl::optional<Fallible>` is move constructible");
+      ETL_STATIC_ASSERT(
+        std::is_move_constructible<etl::optional<Infallible>>::value,
+        "`etl::optional<Infallible>` is move constructible");
+
+      ETL_STATIC_ASSERT(
+        std::is_nothrow_move_constructible<etl::optional<int>>::value,
+        "`etl::optional<int>` move constructor never throws"
+        );
+      ETL_STATIC_ASSERT(
+        !std::is_nothrow_move_constructible<etl::optional<Fallible>>::value,
+        "`etl::optional<Fallible>` move constructor might throw"
+        );
+      ETL_STATIC_ASSERT(
+        std::is_nothrow_move_constructible<etl::optional<Infallible>>::value,
+        "`etl::optional<Infallible>` move constructor never throws"
+        );
+
+      // Compare with STL
+      #if ETL_USING_CPP17
+      static_assert(
+        std::is_nothrow_move_constructible_v<std::optional<int>>,
+        "`std::optional<int>` move constructor never throws"
+        );
+      static_assert(
+        !std::is_nothrow_move_constructible_v<std::optional<Fallible>>,
+        "`std::optional<Fallible>` move constructor might throw"
+        );
+      static_assert(
+        std::is_nothrow_move_constructible_v<std::optional<Infallible>>,
+        "`std::optional<Infallible>` move constructor never throws"
         );
       #endif
     }
