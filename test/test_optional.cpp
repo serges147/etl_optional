@@ -287,6 +287,39 @@ namespace
       #endif
     }
 
+    // `operator=(nullopt_t) noexcept`
+    TEST(test_assert_noexcept_of_nullopt_assignment_cpp11)
+    {
+      ETL_STATIC_ASSERT(
+        (std::is_nothrow_assignable<etl::optional<int>, etl::nullopt_t>::value),
+        "No throw for `opt = etl::nullopt;` where T is fundamental"
+        );
+      ETL_STATIC_ASSERT(
+        (std::is_nothrow_assignable<etl::optional<Fallible>, etl::nullopt_t>::value),
+        "No throw for `opt = etl::nullopt;` where T is fallible"
+        );
+      ETL_STATIC_ASSERT(
+        (std::is_nothrow_assignable<etl::optional<Infallible>, etl::nullopt_t>::value),
+        "No throw for `opt = etl::nullopt;` where T is infallible"
+        );
+
+      // Compare with STL
+      #if ETL_USING_CPP17
+      static_assert(
+        (std::is_nothrow_assignable_v<std::optional<int>, std::nullopt_t>),
+        "No throw for `opt = std::nullopt;` has the same no throw behavior as ETL, where T is fundamental"
+        );
+      static_assert(
+        (std::is_nothrow_assignable_v<std::optional<Fallible>, std::nullopt_t>),
+        "No throw for `opt = std::nullopt;` has the same no throw behavior as ETL, where T is fallible"
+        );
+      static_assert(
+        (std::is_nothrow_assignable_v<std::optional<Infallible>, std::nullopt_t>),
+        "No throw for `opt = std::nullopt;` has the same no throw behavior as ETL, where T is infallible"
+        );
+      #endif
+    }
+
     // `constexpr optional(optional&& other) noexcept(conditional)`
     TEST(test_assert_noexcept_of_move_constructor_cpp11)
     {
@@ -326,6 +359,49 @@ namespace
       static_assert(
         std::is_nothrow_move_constructible_v<std::optional<Infallible>>,
         "`std::optional<Infallible>` move constructor never throws"
+        );
+      #endif
+    }
+
+    // `operator=(optional&& other) noexcept(conditional)`
+    TEST(test_assert_noexcept_of_move_assign_cpp11)
+    {
+      ETL_STATIC_ASSERT(
+        std::is_move_assignable<etl::optional<int>>::value,
+        "`etl::optional<int>` is move assignable");
+      ETL_STATIC_ASSERT(
+        std::is_move_assignable<etl::optional<Fallible>>::value,
+        "`etl::optional<Fallible>` is move assignable");
+      ETL_STATIC_ASSERT(
+        std::is_move_assignable<etl::optional<Infallible>>::value,
+        "`etl::optional<Infallible>` is move assignable");
+
+      ETL_STATIC_ASSERT(
+        std::is_nothrow_move_assignable<etl::optional<int>>::value,
+        "`etl::optional<int>` move assignment never throws"
+        );
+      ETL_STATIC_ASSERT(
+        !std::is_nothrow_move_assignable<etl::optional<Fallible>>::value,
+        "`etl::optional<Fallible>` move assignment might throw"
+        );
+      ETL_STATIC_ASSERT(
+        std::is_nothrow_move_assignable<etl::optional<Infallible>>::value,
+        "`etl::optional<Infallible>` move assignment never throws"
+        );
+
+      // Compare with STL
+      #if ETL_USING_CPP17
+      static_assert(
+        std::is_nothrow_move_assignable_v<std::optional<int>>,
+        "`std::optional<int>` move assignment never throws"
+        );
+      static_assert(
+        !std::is_nothrow_move_assignable_v<std::optional<Fallible>>,
+        "`std::optional<Fallible>` move assignment might throw"
+        );
+      static_assert(
+        std::is_nothrow_move_assignable_v<std::optional<Infallible>>,
+        "`std::optional<Infallible>` move assignment never throws"
         );
       #endif
     }
